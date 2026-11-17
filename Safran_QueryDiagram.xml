@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ***********************************************************************************
+                   (C) Copyright 2019 by Safran Aircraft Engines
+                            All rights reserved
+************************************************************************************ -->
+
+<Module specificationVersion="2.0">
+
+    <ModulePrefs title="SafranArchitecture Query Diagram" height="800" scrolling="true">
+        <Require feature="setprefs" />
+        <Require feature="dynamic-height" />
+    </ModulePrefs>
+
+    <UserPref name="JAZZ_AMHOSTNAME" display_name="Server Hostname" datatype="string"
+        required="true"></UserPref>
+    <UserPref name="JAZZ_AMPROJECTID" display_name="Project ID" datatype="string" required="true"></UserPref>
+    <UserPref name="JAZZ_GCHOSTNAME" display_name="GC Server Hostname" datatype="string"
+        required="true"></UserPref>
+
+    <!-- ?v=... : a changer a chaque version, pour forcer Jazz a relire la page du widget -->
+    <Content type="html" href="./Safran_QueryDiagram.html?v=2026d2" />
+</Module>

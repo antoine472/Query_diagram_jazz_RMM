@@ -1,0 +1,630 @@
+/* =============================================================================
+   SafranArchitecture Query Diagram - mise en page 2026d2
+   Principe : les diagrammes sont ranges par niveau d'analyse de la methode
+   (A operationnel, B fonctionnel, C logique, D technique, comme les packages du
+   profil) : un onglet par niveau, plus l'onglet All. Chaque onglet porte la couleur
+   de son niveau ; le tableau reste sobre pour laisser lire les noms de diagrammes.
+   ============================================================================= */
+
+/* ---- Police IBM Plex Sans (celle de l'interface Jazz / ELM), livree avec le widget.
+   Sans le dossier css/fonts, le navigateur prend Segoe UI ou la police systeme. */
+@font-face {
+    font-family: "IBM Plex Sans";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: local("IBM Plex Sans"), url("fonts/IBMPlexSans-Regular-Latin1.woff2") format("woff2");
+}
+@font-face {
+    font-family: "IBM Plex Sans";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: local("IBM Plex Sans Medium"), url("fonts/IBMPlexSans-Medium-Latin1.woff2") format("woff2");
+}
+@font-face {
+    font-family: "IBM Plex Sans";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: local("IBM Plex Sans SemiBold"), url("fonts/IBMPlexSans-SemiBold-Latin1.woff2") format("woff2");
+}
+
+/* ---- Couleurs et mesures communes */
+:root {
+    --ink: #1d2733;              /* texte principal */
+    --slate: #5b6675;            /* texte secondaire, libelles */
+    --canvas: #eef1f4;           /* fond du widget */
+    --surface: #ffffff;          /* fond des cadres */
+    --line: #d9dee5;             /* bordures fines */
+    --line-strong: #b9c1cc;      /* bordures des listes deroulantes */
+    --focus: #0f62fe;            /* anneau de focus clavier */
+    --hover: #eef3fb;            /* survol neutre */
+    --radius-rail: 8px;
+    --radius-box: 6px;
+    --radius-item: 4px;
+}
+
+/* ---- Couleurs des niveaux d'analyse (teintes historiques du widget, ajustees
+   pour que le texte reste lisible) : accent, fond clair, texte */
+.operational { --layer: #e39400; --layer-soft: #fff4dc; --layer-text: #8a5600; }
+.functional  { --layer: #c0392b; --layer-soft: #fdecea; --layer-text: #9b2c20; }
+.logical     { --layer: #2a7fc1; --layer-soft: #e8f2fb; --layer-text: #1d5f93; }
+.technical   { --layer: #23a256; --layer-soft: #e6f6ec; --layer-text: #18723c; }
+.views       { --layer: #5b6675; --layer-soft: #eef1f4; --layer-text: #3d4754; }
+.all         { --layer: #1d2733; --layer-soft: #e9ecf0; --layer-text: #1d2733; }   /* onglet All */
+
+body {
+    margin: 0;
+    padding: 12px;
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+a {
+    color: var(--ink);
+    text-decoration: none;
+}
+a:hover {
+    color: var(--layer-text, var(--ink));
+    text-decoration: underline;
+}
+a:focus-visible,
+.btn:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: var(--radius-item);
+    box-shadow: none;
+}
+
+/* =============================================================================
+   Barre de selection
+   ============================================================================= */
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px 24px;
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    background-color: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-rail);
+}
+
+.toolbar-fields {
+    flex: 1 1 640px;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px 12px;
+}
+
+.toolbar-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.field-label {
+    margin: 0;
+    color: var(--slate);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* ---- Bouton de liste deroulante : texte a gauche, coupe proprement s'il est trop long */
+.picker {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 6px 30px 6px 10px;
+    background-color: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-box);
+    color: var(--ink);
+    font-size: 0.85rem;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.picker:hover {
+    border-color: var(--slate);
+}
+.picker:focus,
+.picker:focus-visible {
+    border-color: var(--focus);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.25);
+}
+/* ---- Fleche de Bootstrap placee a droite, independante de la longueur du texte */
+.picker.dropdown-toggle::after {
+    position: absolute;
+    right: 11px;
+    top: 50%;
+    margin-top: -2px;
+    color: var(--slate);
+}
+
+/* ---- Contenu des listes : defilement pour les longues listes de GC */
+.dropdown-menu {
+    max-height: 60vh;
+    max-width: 90vw;
+    overflow-y: auto;
+    padding: 4px 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-box);
+    box-shadow: 0 8px 24px rgba(29, 39, 51, 0.14);
+    font-size: 0.85rem;
+}
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    color: var(--ink);
+    white-space: normal;
+}
+.dropdown-item img {
+    flex: none;                  /* icones du widget a leur taille d'origine */
+}
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--hover);
+    color: var(--ink);
+}
+.dropdown-item-text {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+/* ---- Bascule de vues en controle segmente */
+.segmented {
+    gap: 2px;
+    padding: 3px;
+    background-color: #e2e6eb;
+    border-radius: var(--radius-rail);
+}
+.segmented > .btn,
+.segmented > .btn:not(:first-child),
+.segmented > .btn:not(:last-child) {
+    margin: 0;
+    padding: 4px 12px;
+    border: 0;
+    border-radius: var(--radius-box) !important;   /* .btn-group de Bootstrap aplatit les coins */
+    background-color: transparent;
+    color: var(--slate);
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+.segmented > .btn:hover {
+    color: var(--ink);
+}
+.segmented > .btn.active {
+    background-color: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgba(29, 39, 51, 0.2);
+}
+.view-count {
+    margin-left: 6px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background-color: #cfd6de;
+    color: var(--ink);
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+.segmented > .btn.active .view-count {
+    background-color: var(--ink);
+    color: #ffffff;
+}
+.view-count:empty {
+    display: none;               /* pas de pastille tant que rien n'est charge */
+}
+
+.widget-version {
+    margin: 0;
+    color: var(--slate);
+    font-size: 0.7rem;
+}
+
+/* =============================================================================
+   Vue Diagrams : onglets All / A / B / C / D, puis tableau filtrable
+   ============================================================================= */
+.diagram-view[hidden],
+.list-view[hidden] {
+    display: none !important;    /* l'attribut hidden l'emporte sur display: grid */
+}
+
+/* ---- Onglets : lettre du package du profil, nom du niveau, types remplis, compteur */
+.level-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.level-tab {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    min-height: 60px;
+    padding: 8px 14px;
+    background-color: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--layer);
+    border-radius: var(--radius-rail);
+    color: var(--layer-text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.level-tab:hover {
+    background-color: var(--layer-soft);
+}
+.level-tab.active {
+    background-color: var(--layer-soft);
+    border: 2px solid var(--layer);
+    border-bottom-width: 4px;
+}
+.level-tab:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+}
+.tab-letter {
+    flex: none;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1;
+}
+.tab-text {
+    flex: 1;
+    min-width: 0;
+}
+.tab-name {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+.tab-detail {
+    display: block;
+    font-size: 0.75rem;
+}
+.tab-count {
+    flex: none;
+    min-width: 28px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background-color: var(--layer-text);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+}
+.tab-count:empty,
+.tab-detail:empty {
+    display: none;               /* rien tant que la liste n'est pas chargee */
+}
+
+/* ---- Panneau du tableau, lisere de la couleur de l'onglet courant */
+.box.diagram-panel {
+    padding: 12px;
+    border-top: 4px solid var(--layer);
+}
+.box.diagram-panel:hover {
+    border-color: var(--line);
+    border-top-color: var(--layer);
+}
+
+/* ---- Tableau : largeurs fixes, la colonne du nom prend la place restante */
+.diagram-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    font-size: 0.85rem;
+}
+.diagram-table .col-type     { width: 230px; }
+.diagram-table .col-modified { width: 140px; }
+.diagram-table .col-owner    { width: 130px; }
+.diagram-table .col-actions  { width: 76px; }
+
+/* ---- En-tete et filtres restent visibles pendant le defilement */
+.diagram-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+.head-row th {
+    padding: 8px 10px;
+    background-color: #2b3a4a;
+    border-left: 1px solid #45566a;
+    color: #ffffff;
+    font-weight: 600;
+    text-align: left;
+}
+.head-row th:first-child {
+    border-left: 0;
+    border-top-left-radius: var(--radius-box);
+}
+.head-row th:last-child {
+    border-top-right-radius: var(--radius-box);
+    text-align: center;
+}
+.filter-row th {
+    padding: 4px 6px;
+    background-color: #f2f4f7;
+    border-bottom: 1px solid var(--line);
+    font-weight: 400;
+}
+.column-filter {
+    width: 100%;
+    min-height: 30px;
+    padding: 4px 8px;
+    background-color: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-item);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.8rem;
+}
+.column-filter::placeholder {
+    color: #8a94a3;
+}
+.column-filter:focus {
+    border-color: var(--focus);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.25);
+}
+
+/* ---- Lignes */
+.diagram-table td {
+    padding: 5px 10px;
+    border-bottom: 1px solid #e4e8ed;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+}
+.diagram-row:nth-child(even) td {
+    background-color: #f7f8fa;
+}
+.diagram-row:hover td {
+    background-color: var(--layer-soft);
+}
+/* ---- Type : affiche du type reduite, ou pastille de la couleur du niveau */
+.type-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+.type-icon {
+    flex: none;
+    width: 44px;
+    height: 26px;
+    object-fit: contain;
+}
+.type-chip {
+    flex: none;
+    width: 22px;
+    height: 14px;
+    margin: 0 11px;
+    border-radius: 3px;
+    background-color: var(--layer);
+}
+.type-label {
+    min-width: 0;
+    color: var(--slate);
+    font-size: 0.75rem;
+}
+.cell-name a {
+    font-weight: 500;
+}
+.cell-modified,
+.cell-owner {
+    color: #3b4654;
+}
+.cell-actions {
+    text-align: center;
+}
+.cell-actions a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-box);
+    color: var(--slate);
+}
+.cell-actions a:hover,
+.cell-actions a:focus-visible {
+    background-color: var(--surface);
+    color: var(--layer-text);
+}
+/* ---- Texte trouve par le filtre du nom */
+.diagram-table mark {
+    padding: 0 1px;
+    background-color: #ffe58a;
+    color: inherit;
+    border-radius: 2px;
+}
+/* ---- Ligne de message : Select configuration, chargement, erreur, aucun resultat */
+.state-row td {
+    padding: 14px 12px;
+    color: var(--slate);
+}
+/* ---- Types sans diagramme */
+.empty-types {
+    margin: 10px 0 0 0;
+    padding: 8px 12px;
+    background-color: #f7f8fa;
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius-box);
+    color: var(--slate);
+    font-size: 0.8rem;
+}
+.empty-types[hidden] {
+    display: none;
+}
+
+/* ---- Cadre (panneau du tableau, vues Tables et Matrices) */
+.box {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;                /* un cadre peut etre plus etroit que son contenu */
+    padding: 12px 10px 8px 12px;
+    background-color: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-box);
+}
+.box:hover {
+    border-color: var(--layer);
+}
+
+/* ---- Listes des cadres : defilement interne au-dela d'une quinzaine de lignes */
+.box ul {
+    max-height: 16rem;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+    font-size: 0.82rem;
+    overflow-wrap: anywhere;     /* noms longs (environmentdiagram_1...) */
+}
+.box li {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 3px 6px;
+    border-radius: var(--radius-item);
+    line-height: 1.35;
+}
+.box li:hover {
+    background-color: var(--layer-soft);
+}
+.box li > a:first-child {
+    flex: 1;
+    min-width: 0;
+}
+/* ---- Bouton de telechargement discret, accentue au survol de la ligne */
+.box li > a[download] {
+    flex: none;
+    color: var(--slate);
+    opacity: 0.55;
+}
+.box li:hover > a[download],
+.box li > a[download]:focus-visible {
+    color: var(--layer-text);
+    opacity: 1;
+}
+/* ---- Lignes sans lien ("Select configuration", messages) : texte secondaire */
+.box li:not(:has(a)) {
+    color: var(--slate);
+}
+.box li:not(:has(a)):hover {
+    background-color: transparent;
+}
+
+/* =============================================================================
+   Vues Tables et Matrices : un groupe par type, en colonnes
+   ============================================================================= */
+.list-view .box {
+    padding: 14px 16px;
+}
+.view-title {
+    margin: 0 0 10px 0;
+    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 600;
+}
+#table_list,
+#matrix_list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    max-height: none;
+}
+#table_list > li,
+#matrix_list > li {
+    display: block;
+}
+#table_list > li:hover,
+#matrix_list > li:hover {
+    background-color: transparent;
+}
+.box .view-group {
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-box);
+}
+.view-type {
+    margin: 0 0 6px 0;
+    color: var(--ink);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+.box .view-items {
+    max-height: none;
+    font-size: 1em;              /* la liste parente a deja une taille reduite */
+}
+.box .view-items li:hover {
+    background-color: var(--hover);
+}
+.view-empty {
+    color: var(--slate);
+}
+
+/* =============================================================================
+   Widget etroit : onglets sur plusieurs lignes, colonnes resserrees
+   ============================================================================= */
+@media (max-width: 1100px) {
+    .toolbar-fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .level-tabs {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .diagram-table .col-type {
+        width: 180px;
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 8px;
+    }
+    .toolbar-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .toolbar-side {
+        align-items: flex-start;
+    }
+    .level-tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .type-label {
+        display: none;           /* l'affiche seule suffit a reconnaitre le type */
+    }
+    .diagram-table .col-type     { width: 66px; }
+    .diagram-table .col-modified { width: 96px; }
+    .diagram-table .col-owner    { width: 80px; }
+    .diagram-table .col-actions  { width: 48px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}

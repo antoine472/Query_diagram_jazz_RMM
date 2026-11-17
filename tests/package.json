@@ -1,0 +1,13 @@
+{
+  "name": "safran-query-diagram-tests",
+  "version": "2026.0.2",
+  "private": true,
+  "description": "Tests unitaires du widget SafranArchitecture Query Diagram (jsdom + jQuery)",
+  "scripts": {
+    "test": "node test_d2.js .."
+  },
+  "dependencies": {
+    "jquery": "3.6.0",
+    "jsdom": "24.1.3"
+  }
+}

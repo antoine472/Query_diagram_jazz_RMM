@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Frameworks -->
+    <script src="js/jquery/jquery-3.6.0.min.js"></script>
+
+    <link rel="stylesheet" href="js/bootstrap/4.6.1/css/bootstrap.min.css">
+    <script src="js/bootstrap/4.6.1/js/bootstrap.bundle.js"></script>
+
+    <script src="js/handlebars/handlebars-v4.7.7.js"></script>
+
+    <!-- Internal Tools -->
+    <!-- ?v=... : a changer a chaque version, pour forcer le rechargement des fichiers modifies -->
+    <script src="js/ELM_utils.js"></script>
+    <script src="js/types.js"></script>
+    <script src="js/global.configuration.js?v=2026d2"></script>
+    <script src="js/safran-controller.js?v=2026d2"></script>
+    <script src="js/safran-query-diagram.js"></script>
+
+    <link rel="icon" type="image/png" href="resources/diagram_dashboard_icon.png" />
+    <link rel="stylesheet" href="./css/grid.css?v=2026d2">
+    <script defer src="js/font-awesome/6.7.0/js/all.min.js"></script>
+
+    <title>SafranArchitecture Query Diagram</title>
+</head>
+
+<body>
+    <!-- Barre de selection : configuration GC, baseline, stream AM, composant, puis la vue -->
+    <header class="toolbar">
+        <div class="toolbar-fields">
+            <div class="field">
+                <label class="field-label" for="gui_gcconfigBtn">GC configuration</label>
+                <div class="dropdown">
+                    <button class="btn picker dropdown-toggle" type="button" id="gui_gcconfigBtn"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select the GC Configuration</button>
+                    <div class="dropdown-menu" aria-labelledby="gui_gcconfigBtn" id="gui_gcconfigBtnContent"></div>
+                </div>
+            </div>
+            <!-- Baselines du stream GC choisi (par defaut : le stream lui-meme) -->
+            <div class="field">
+                <label class="field-label" for="gui_gcbaselineBtn">GC baseline</label>
+                <div class="dropdown">
+                    <button class="btn picker dropdown-toggle" type="button" id="gui_gcbaselineBtn"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select the GC Configuration first</button>
+                    <div class="dropdown-menu" aria-labelledby="gui_gcbaselineBtn" id="gui_gcbaselineBtnContent"></div>
+                </div>
+            </div>
+            <div class="field">
+                <label class="field-label" for="gui_amStreamBtn">AM stream</label>
+                <div class="dropdown">
+                    <button class="btn picker dropdown-toggle" type="button" id="gui_amStreamBtn"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select the AM Stream</button>
+                    <div class="dropdown-menu" aria-labelledby="gui_amStreamBtn" id="gui_amStreamBtnContent"></div>
+                </div>
+            </div>
+            <div class="field">
+                <label class="field-label" for="gui_componentBtn">Component</label>
+                <div class="dropdown">
+                    <button class="btn picker dropdown-toggle" type="button" id="gui_componentBtn"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select the Component</button>
+                    <div class="dropdown-menu" aria-labelledby="gui_componentBtn" id="gui_componentBtnContent"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Bascule des vues : tableau des diagrammes, liste des tables, liste des matrices -->
+        <div class="toolbar-side">
+            <div class="field">
+                <span class="field-label" id="lbl_view">View</span>
+                <div class="btn-group segmented" role="group" aria-labelledby="lbl_view" id="gui_viewSwitch">
+                    <button type="button" class="btn active" data-view="diagrams" aria-pressed="true">Diagrams<span
+                            class="view-count" id="gui_count_diagrams"></span></button>
+                    <button type="button" class="btn" data-view="tables" aria-pressed="false">Tables<span
+                            class="view-count" id="gui_count_tables"></span></button>
+                    <button type="button" class="btn" data-view="matrices" aria-pressed="false">Matrices<span
+                            class="view-count" id="gui_count_matrices"></span></button>
+                </div>
+            </div>
+            <p id="widget_version" class="widget-version">Widget version : 2026d2</p>
+        </div>
+    </header>
+
+    <main>
+        <!-- Vue Diagrams : un onglet par niveau d'analyse (A operationnel ... D technique) et
+             l'onglet All, puis le tableau des diagrammes de l'onglet courant. Le compteur d'un
+             onglet donne le nombre de diagrammes qui passent les filtres des colonnes. -->
+        <div class="diagram-view" id="diagrams_view">
+            <nav class="level-tabs" id="gui_levelTabs" aria-label="Analysis levels">
+            <button type="button" class="level-tab all" data-tab="ALL" aria-pressed="false">
+                <span class="tab-letter">All</span>
+                <span class="tab-text"><span class="tab-name">All levels</span><span class="tab-detail" id="gui_tab_detail_ALL"></span></span>
+                <span class="tab-count" id="gui_tab_count_ALL"></span>
+            </button>
+            <button type="button" class="level-tab operational" data-tab="A" aria-pressed="false">
+                <span class="tab-letter">A</span>
+                <span class="tab-text"><span class="tab-name">Operational</span><span class="tab-detail" id="gui_tab_detail_A"></span></span>
+                <span class="tab-count" id="gui_tab_count_A"></span>
+            </button>
+            <button type="button" class="level-tab functional" data-tab="B" aria-pressed="false">
+                <span class="tab-letter">B</span>
+                <span class="tab-text"><span class="tab-name">Functional</span><span class="tab-detail" id="gui_tab_detail_B"></span></span>
+                <span class="tab-count" id="gui_tab_count_B"></span>
+            </button>
+            <button type="button" class="level-tab logical" data-tab="C" aria-pressed="false">
+                <span class="tab-letter">C</span>
+                <span class="tab-text"><span class="tab-name">Logical</span><span class="tab-detail" id="gui_tab_detail_C"></span></span>
+                <span class="tab-count" id="gui_tab_count_C"></span>
+            </button>
+            <button type="button" class="level-tab technical" data-tab="D" aria-pressed="false">
+                <span class="tab-letter">D</span>
+                <span class="tab-text"><span class="tab-name">Technical</span><span class="tab-detail" id="gui_tab_detail_D"></span></span>
+                <span class="tab-count" id="gui_tab_count_D"></span>
+            </button>
+            </nav>
+
+            <section class="box diagram-panel all" id="gui_diagramPanel">
+                <table class="diagram-table" id="diagram_table">
+                    <colgroup>
+                        <col class="col-type">
+                        <col class="col-name">
+                        <col class="col-modified">
+                        <col class="col-owner">
+                        <col class="col-actions">
+                    </colgroup>
+                    <thead>
+                        <tr class="head-row">
+                            <th scope="col">Diagram type</th>
+                            <th scope="col">Diagram name</th>
+                            <th scope="col">Modified</th>
+                            <th scope="col">Owner</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                        <!-- Filtres des colonnes : texte contenu, sans tenir compte des majuscules -->
+                        <tr class="filter-row">
+                            <th><input type="search" class="column-filter" data-filter="type" placeholder="Type to filter" aria-label="Filter on diagram type"></th>
+                            <th><input type="search" class="column-filter" data-filter="name" placeholder="Type to filter" aria-label="Filter on diagram name"></th>
+                            <th><input type="search" class="column-filter" data-filter="modified" placeholder="Type to filter" aria-label="Filter on modification date"></th>
+                            <th><input type="search" class="column-filter" data-filter="owner" placeholder="Type to filter" aria-label="Filter on owner"></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="diagram_rows">
+                        <tr class="state-row"><td colspan="5">Select configuration</td></tr>
+                    </tbody>
+                </table>
+                <!-- Types de l'onglet courant qui n'ont encore aucun diagramme -->
+                <p class="empty-types" id="gui_emptyTypes" hidden></p>
+            </section>
+        </div>
+
+        <!-- Vue Tables : un groupe par type de table -->
+        <div class="list-view" id="tables_view" hidden>
+            <section class="box views">
+                <h2 class="view-title">Tables</h2>
+                <ul id="table_list">
+                    <li>Select configuration</li>
+                </ul>
+            </section>
+        </div>
+        <!-- Vue Matrices : un groupe par type de matrice -->
+        <div class="list-view" id="matrices_view" hidden>
+            <section class="box views">
+                <h2 class="view-title">Matrices</h2>
+                <ul id="matrix_list">
+                    <li>Select configuration</li>
+                </ul>
+            </section>
+        </div>
+    </main>
+</body>
+
+</html>
