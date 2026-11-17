@@ -3,7 +3,7 @@
 Widget de tableau de bord Jazz qui liste les diagrammes, tables et matrices d'un projet Rhapsody
 stocke dans RMM, pour la configuration choisie (GC, baseline, AM stream, composant).
 
-Version : **2026d2** (30/10/2026). Le detail des changements est dans `LISEZMOI.txt`.
+Version : **2026d2** (30/10/2026). Le detail de la version est dans le fichier `v2026d2`.
 
 ## Contenu
 

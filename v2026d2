@@ -1,0 +1,51 @@
+SafranArchitecture Query Diagram - version 2026d2 (30/10/2026)
+==============================================================
+
+Widget de tableau de bord Jazz qui liste les diagrammes, tables et matrices d'un projet Rhapsody
+stocke dans RMM, pour la configuration choisie (GC, baseline, AM stream, composant).
+
+Nouveautes de la 2026d2
+-----------------------
+  - Vue Diagrams refaite :
+      * onglets All / A Operational / B Functional / C Logical / D Technical, avec le nombre de
+        diagrammes et le nombre de types qui en ont ; dernier onglet memorise
+      * tableau : type (affiche reduite), nom, date de modification, owner, actions
+      * une ligne de filtres sous l en-tete (texte contenu, sans tenir compte des majuscules) ;
+        le texte trouve dans le nom est surligne ; les filtres restent actifs quand on change d onglet
+      * en-tete et filtres restent visibles pendant le defilement
+      * types sans diagramme rappeles sous le tableau
+  - Date de modification et owner : champs modified et modifiedBy du reporting, sans requete en plus.
+    La date est affichee en heure locale. Owner = dernier auteur de la modification
+    (le reporting ne donne pas le createur).
+  - Nouveau type affiche : Functional Sequence Diagram (onglet B, pastille rouge faute d affiche)
+  - Pas de regroupement des custom views : RMM ne publie aucun lien entre un diagramme et ses
+    vues filtrees (verifie le 30/10/2026)
+
+Fonctions reprises des versions precedentes
+-------------------------------------------
+  2026d  (29/10/2026) : mise en page compacte, bandeaux de niveau A a D, police IBM Plex Sans,
+                        cadre Functional Chain Diagram
+  2026c  (28/10/2026) : liste GC complete, GC Baseline, memoire des choix,
+                        vues Diagrams / Tables / Matrices, parametre ?v= contre le cache
+  2026b  (28/10/2026) : Operating Mode Chart et TBS (noms des New Terms), cadres Environment et SFB,
+                        prefixe proprietaire des mode charts, copies heritees masquees
+  2026a  (26/10/2026) : version d origine
+
+Fichiers modifies par rapport a la 2026d
+----------------------------------------
+  Safran_QueryDiagram.xml
+  Safran_QueryDiagram.html
+  js/safran-controller.js
+  css/grid.css
+js/global.configuration.js et css/fonts/ sont identiques a la 2026d. js/ELM_utils.js, js/types.js
+et js/safran-query-diagram.js sont inchanges depuis l origine.
+
+Controle apres installation
+---------------------------
+  - La page affiche "Widget version : 2026d2" et les onglets All / A / B / C / D.
+  - Si le tableau de bord montre encore l ancienne page : supprimer le widget puis l ajouter
+    de nouveau avec l adresse .../Safran_QueryDiagram.xml?v=2026d2
+
+Tests
+-----
+  50 tests unitaires (jsdom + jQuery) dans tests/test_d2.js : 50 OK / 0 FAIL le 17/11/2026.
